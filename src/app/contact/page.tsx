@@ -1,46 +1,23 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useActionState, useEffect } from "react";
 import Navigation from "@/components/layout/Navigation";
 import Footer from "@/components/layout/Footer";
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
+import { submitContactForm } from "@/app/actions/contact";
 
 export default function ContactPage() {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
-  const [company, setCompany] = useState("");
-  const [service, setService] = useState("");
-  const [requirements, setRequirements] = useState("");
-  const [message, setMessage] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [state, formAction, isPending] = useActionState(submitContactForm, null);
   const [success, setSuccess] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    
-    try {
-      await fetch("https://script.google.com/macros/s/AKfycbyOmTh8IsaWqT1WY-ZzUGlob6ZsRY5qNkXchxQWOmjlvPzoVgMjgpMz06NPPTU3QH7-Qw/exec", {
-        method: "POST",
-        body: JSON.stringify({ name, email, phone, company, service, requirements, message }),
-      });
+  useEffect(() => {
+    if (state?.success) {
       setSuccess(true);
-      setName("");
-      setEmail("");
-      setPhone("");
-      setCompany("");
-      setService("");
-      setRequirements("");
-      setMessage("");
-    } catch (error) {
-      console.error(error);
-      alert("Something went wrong. Please try again.");
-    } finally {
-      setLoading(false);
+    } else if (state?.error) {
+      alert(state.error);
     }
-  };
+  }, [state]);
 
   return (
     <main className="relative flex min-h-screen flex-col items-center justify-start w-full overflow-hidden bg-white">
@@ -55,8 +32,6 @@ export default function ContactPage() {
       
       <section className="relative w-full pt-48 pb-32 flex flex-col items-center justify-center px-6 z-20">
         
-
-
         <div className="w-full max-w-5xl grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
           <div>
             <h1 className="font-geist font-bold text-5xl md:text-7xl tracking-tighter text-text-primary mb-6">
@@ -100,15 +75,19 @@ export default function ContactPage() {
                 </button>
               </div>
             ) : (
-              <form className="flex flex-col gap-6" onSubmit={handleSubmit}>
+              <form className="flex flex-col gap-6" action={formAction}>
+                {/* Honeypot Field for Bot Protection */}
+                <div style={{ display: "none" }} aria-hidden="true">
+                  <input type="text" name="aether_website_url" tabIndex={-1} autoComplete="off" />
+                </div>
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="flex flex-col gap-2">
                     <label className="font-inter text-sm font-medium text-text-primary">Name</label>
                     <input 
                       type="text" 
+                      name="name"
                       required
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
                       placeholder="Full Name" 
                       className="w-full px-4 py-3 rounded-xl border border-border bg-secondary/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-accent-green/50 transition-all font-inter"
                     />
@@ -117,9 +96,8 @@ export default function ContactPage() {
                     <label className="font-inter text-sm font-medium text-text-primary">Work Email</label>
                     <input 
                       type="email" 
+                      name="email"
                       required
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
                       placeholder="name@company.com" 
                       className="w-full px-4 py-3 rounded-xl border border-border bg-secondary/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-accent-green/50 transition-all font-inter"
                     />
@@ -131,8 +109,7 @@ export default function ContactPage() {
                     <label className="font-inter text-sm font-medium text-text-primary">Phone</label>
                     <input 
                       type="tel" 
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
+                      name="phone"
                       placeholder="+1 (555) 000-0000" 
                       className="w-full px-4 py-3 rounded-xl border border-border bg-secondary/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-accent-green/50 transition-all font-inter"
                     />
@@ -141,9 +118,8 @@ export default function ContactPage() {
                     <label className="font-inter text-sm font-medium text-text-primary">Company</label>
                     <input 
                       type="text" 
+                      name="company"
                       required
-                      value={company}
-                      onChange={(e) => setCompany(e.target.value)}
                       placeholder="Company Name" 
                       className="w-full px-4 py-3 rounded-xl border border-border bg-secondary/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-accent-green/50 transition-all font-inter"
                     />
@@ -154,9 +130,9 @@ export default function ContactPage() {
                   <div className="flex flex-col gap-2">
                     <label className="font-inter text-sm font-medium text-text-primary">Service</label>
                     <select 
+                      name="service"
                       required
-                      value={service}
-                      onChange={(e) => setService(e.target.value)}
+                      defaultValue=""
                       className="w-full px-4 py-3 rounded-xl border border-border bg-secondary/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-accent-green/50 transition-all font-inter appearance-none cursor-pointer text-text-secondary"
                     >
                       <option value="" disabled>Select a service</option>
@@ -169,9 +145,9 @@ export default function ContactPage() {
                   <div className="flex flex-col gap-2">
                     <label className="font-inter text-sm font-medium text-text-primary">Requirements</label>
                     <select 
+                      name="requirements"
                       required
-                      value={requirements}
-                      onChange={(e) => setRequirements(e.target.value)}
+                      defaultValue=""
                       className="w-full px-4 py-3 rounded-xl border border-border bg-secondary/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-accent-green/50 transition-all font-inter appearance-none cursor-pointer text-text-secondary"
                     >
                       <option value="" disabled>Select requirement</option>
@@ -185,20 +161,20 @@ export default function ContactPage() {
                 <div className="flex flex-col gap-2">
                   <label className="font-inter text-sm font-medium text-text-primary">How can we help?</label>
                   <textarea 
+                    name="message"
                     rows={4}
                     required
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
                     placeholder="Tell us about your infrastructure goals..." 
                     className="w-full px-4 py-3 rounded-xl border border-border bg-secondary/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-accent-green/50 transition-all font-inter resize-none"
                   />
                 </div>
                 
                 <button 
-                  disabled={loading}
+                  disabled={isPending}
+                  type="submit"
                   className="group relative inline-flex items-center justify-center w-full px-6 py-4 mt-4 text-lg font-semibold text-white bg-black rounded-xl overflow-hidden transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:bg-black disabled:hover:text-white hover:bg-accent-green hover:text-black shadow-md"
                 >
-                  <span className="relative z-10">{loading ? "Submitting..." : "Request Architecture Review"}</span>
+                  <span className="relative z-10">{isPending ? "Submitting..." : "Request Architecture Review"}</span>
                 </button>
               </form>
             )}

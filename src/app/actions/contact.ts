@@ -47,7 +47,7 @@ export async function submitContactForm(prevState: any, formData: FormData) {
 
   // 4. Secure Backend Submit (URL is hidden from client)
   try {
-    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyOmTh8IsaWqT1WY-ZzUGlob6ZsRY5qNkXchxQWOmjlvPzoVgMjgpMz06NPPTU3QH7-Qw/exec";
+    const GOOGLE_SCRIPT_URL = process.env.GOOGLE_SCRIPT_URL || "https://script.google.com/macros/s/AKfycbyOmTh8IsaWqT1WY-ZzUGlob6ZsRY5qNkXchxQWOmjlvPzoVgMjgpMz06NPPTU3QH7-Qw/exec";
     
     const response = await fetch(GOOGLE_SCRIPT_URL, {
       method: "POST",
